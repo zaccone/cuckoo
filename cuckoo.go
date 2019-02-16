@@ -30,7 +30,6 @@ func (i *Item) String() string {
 
 // Cuckoo is a structure representing whole hash object
 // For now lets make it of key integer and value string
-// TODO(mde): store configurable hash functions, maybe somebody wants to use their own?
 type Cuckoo struct {
 	size uint64
 	yin  []*Item
@@ -67,15 +66,15 @@ func (c *Cuckoo) Insert(key uint64, value string) bool {
 		return true
 	}
 
-	// Try misplacing element from yin and see if that is possible. If so, enter the element into yin
+	// try misplacing element from yin and see if that is possible. If so, enter the element into yin
 
-	if c.Insert(yinH, c.yin[yinH].Value) {
+	if c.Insert(c.yin[yinH].Key, c.yin[yinH].Value) {
 		c.yin[yinH] = &Item{Key: key, Value: value}
 		return true
 	}
-	// Try misplacing element from yang and see if that is possible. If so, enter the element into yang
+	// try misplacing element from yang and see if that is possible. If so, enter the element into yang
 
-	if c.Insert(yangH, c.yang[yangH].Value) {
+	if c.Insert(c.yang[yangH].Key, c.yang[yangH].Value) {
 		c.yin[yangH] = &Item{Key: key, Value: value}
 		return true
 	}
@@ -108,13 +107,21 @@ func (c *Cuckoo) Delete(key uint64) bool {
 func (c *Cuckoo) Debug() {
 	fmt.Println("Yin: ")
 	for idx, item := range c.yin {
-		fmt.Printf("%d: %s", idx, item.String())
+		str := "nil"
+		if item != nil {
+			str = item.String()
+		}
+		fmt.Printf("%d: %s", idx, str)
 	}
 	fmt.Println("")
 
 	fmt.Println("Yang: ")
 	for idx, item := range c.yang {
-		fmt.Printf("%d: %s", idx, item.String())
+		str := "nil"
+		if item != nil {
+			str = item.String()
+		}
+		fmt.Printf("%d: %s", idx, str)
 	}
 	fmt.Println("")
 }

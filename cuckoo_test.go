@@ -89,11 +89,16 @@ Key  YinFn YangFn
 func TestInsertWithEviction(t *testing.T) {
 	cuckoo := NewDefaultHash(TableSize)
 
-	// Value 3 hashes to
-	i1 := &Item{Key: 3, Value: "three"}
-	i2 := &Item{Key: 36, Value: "thirty six"}
-	i3 := &Item{Key: 39, Value: "thirty nine"}
-	i4 := &Item{Key: 105, Value: "hundred and five"}
+	/*
+		We trigger this order of inserts to trigger cuckko eviction. At first Item with key 105 will be hashed to yin[6], however, later
+		after adding 39, it will be rehashed to yang[9].
+
+
+	*/
+	i1 := &Item{Key: 105, Value: "hundred and five"}
+	i2 := &Item{Key: 3, Value: "three"}
+	i3 := &Item{Key: 36, Value: "thirty six"}
+	i4 := &Item{Key: 39, Value: "thirty nine"}
 
 	cuckoo.Insert(i1.Key, i1.Value)
 	cuckoo.Insert(i2.Key, i2.Value)
@@ -121,7 +126,65 @@ func TestInsertWithEviction(t *testing.T) {
 	ci4 := cuckoo.Lookup(i4.Key)
 
 	if itemCompare(i4, ci4) == false {
-		t.Errorf("Item 3 mismatch: original item %s, fetched item: %s", i4.String(), ci4.String())
+		t.Errorf("Item 4 mismatch: original item %s, fetched item: %s", i4.String(), ci4.String())
+	}
+
+	/* 	Ensure that items are in the correct  indexes in the internal tables */
+
+	var it *Item
+
+	it = cuckoo.yin[3]
+
+	if it == nil {
+		t.Errorf("Expected to have non nil *Item at cucko.yin[3]")
+	}
+
+	if itemCompare(it, i2) == false {
+		t.Errorf("Item mismatch, expected got: %s, expected: %s", it.String(), i2.String())
+	}
+
+	it = cuckoo.yin[6]
+	if it == nil {
+		t.Errorf("Expected to have non nil *Item at cucko.yin[6]")
+	}
+
+	if itemCompare(it, i4) == false {
+		t.Errorf("Item mismatch, expected got: %s, expected: %s", it.String(), i2.String())
+	}
+
+	it = cuckoo.yang[3]
+	if it == nil {
+		t.Errorf("Expected to have non nil *Item at cucko.yang[3]")
+	}
+
+	if itemCompare(it, i3) == false {
+		t.Errorf("Item mismatch, expected got: %s, expected: %s", it.String(), i2.String())
+	}
+
+	it = cuckoo.yang[9]
+
+	if it == nil {
+		t.Errorf("Expected to have non nil *Item at cucko.yang[9]")
+	}
+
+	if itemCompare(it, i1) == false {
+		t.Errorf("Item mismatch, expected got: %s, expected: %s", it.String(), i2.String())
+	}
+
+	// Usefull to debug when you run
+	// $ go test -v
+	t.Log("Inspecting Cuckoo.yin")
+	for idx, item := range cuckoo.yin {
+		if item != nil {
+			t.Logf("At index %d found %s", idx, item.String())
+		}
+	}
+
+	t.Log("Inspecting Cuckoo.yang")
+	for idx, item := range cuckoo.yang {
+		if item != nil {
+			t.Logf("At index %d found %s", idx, item.String())
+		}
 	}
 
 }
