@@ -41,7 +41,12 @@ type Cuckoo struct {
 }
 
 // New returns new Cuckoo hash object with the size initialized via the parameter
-func New(size uint64) *Cuckoo {
+func New(size uint64, yinFn hashFn, yangFn hashFn) *Cuckoo {
+	return &Cuckoo{size, make([]*Item, size), make([]*Item, size), yinFn, yangFn}
+}
+
+// NewDefaultHash returns a Cuckoo object with internal tables set to size and default hash functions: yinHash and yangHash
+func NewDefaultHash(size uint64) *Cuckoo {
 	return &Cuckoo{size, make([]*Item, size), make([]*Item, size), yinHash, yangHash}
 }
 

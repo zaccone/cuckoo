@@ -13,7 +13,7 @@ func itemCompare(i1 *Item, i2 *Item) bool {
 }
 
 func TestLookupNil(t *testing.T) {
-	cuckoo := New(TableSize)
+	cuckoo := NewDefaultHash(TableSize)
 
 	for k := uint64(0); k < 100; k++ {
 		if cuckoo.Lookup(k) != nil {
@@ -24,7 +24,7 @@ func TestLookupNil(t *testing.T) {
 }
 
 func TestInsertOnEmpty(t *testing.T) {
-	cuckoo := New(TableSize)
+	cuckoo := NewDefaultHash(TableSize)
 
 	item := &Item{Key: 13, Value: "marek"}
 
@@ -50,7 +50,7 @@ func TestInsertOnEmpty(t *testing.T) {
 
 func TestInsertWithSameKey(t *testing.T) {
 
-	cuckoo := New(TableSize)
+	cuckoo := NewDefaultHash(TableSize)
 
 	i1 := &Item{Key: 3, Value: "three"}
 	i2 := &Item{Key: 36, Value: "thirty six"}
@@ -87,7 +87,7 @@ Key  YinFn YangFn
 
 */
 func TestInsertWithEviction(t *testing.T) {
-	cuckoo := New(TableSize)
+	cuckoo := NewDefaultHash(TableSize)
 
 	// Value 3 hashes to
 	i1 := &Item{Key: 3, Value: "three"}
@@ -127,7 +127,7 @@ func TestInsertWithEviction(t *testing.T) {
 }
 
 func TestEmptyLookup(t *testing.T) {
-	cuckoo := New(TableSize)
+	cuckoo := NewDefaultHash(TableSize)
 
 	// Value 3 hashes to
 	i1 := &Item{Key: 3, Value: "three"}
